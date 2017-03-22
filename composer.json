@@ -1,0 +1,15 @@
+{
+    "name": "g4/image",
+    "description": "image php library",
+    "keywords": [],
+    "license": "MIT",
+    "authors": [],
+    "autoload": {
+        "psr-4": {"G4\\Image\\": "src/"}
+    },
+    "require": {
+        "php"                : ">=5.4",
+        "g4/storage"         : "0.5.1",
+        "intervention/image" : "2.*"
+    }
+}

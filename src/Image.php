@@ -80,11 +80,11 @@ class Image
     public function createImageResourceFromBase64Encoded()
     {
         if ( $this->base64Encoded === null ) {
-            throw new \Exception('Missing base64 encoded image.', HTTP_CODE_415);
+            throw new \Exception('Missing base64 encoded image.', Consts::HTTP_CODE_415);
         }
 
         if ( ! $this->allowedImageHeader() ) {
-            throw new \Exception('Image has unavailable MIME type.', HTTP_CODE_415);
+            throw new \Exception('Image has unavailable MIME type.', Consts::HTTP_CODE_415);
         }
 
         $this->base64Encoded = str_replace(Consts::getAllowedHeaders(), '', $this->base64Encoded);
@@ -104,7 +104,7 @@ class Image
         $source = $this->getCreatedImageResource($decoded);
 
         if ($source === false) {
-            throw new \Exception('Cannot create image from post data.', HTTP_CODE_400);
+            throw new \Exception('Cannot create image from post data.', Consts::HTTP_CODE_400);
         }
 
         $this->setWidth($this->imageProcess->getWidth($source));
@@ -126,7 +126,7 @@ class Image
         $srcImg = $this->getImageSource();
 
         if ($srcImg == null) {
-            throw new \Exception('Source image not found.', HTTP_CODE_403);
+            throw new \Exception('Source image not found.', Consts::HTTP_CODE_403);
         }
         $cropImg = $this->imageProcess->crop($srcImg, $width, $height, $x, $y);
 
@@ -449,7 +449,7 @@ class Image
         $photoContent = file_get_contents($img->dirname . '/' . $img->filename);
 
         if (!$photoContent) {
-            throw new \Exception('File upload error', HTTP_CODE_400);
+            throw new \Exception('File upload error', Consts::HTTP_CODE_400);
         }
 
         $this->checkImageWidth($img->width());
@@ -461,7 +461,7 @@ class Image
         @unlink($img->dirname . '/' . $img->filename);
 
         return [
-            'code'  => HTTP_CODE_200,
+            'code'  => Consts::HTTP_CODE_200,
             'photo' => $photo
         ];
 
@@ -488,7 +488,7 @@ class Image
     private function checkFileType($type)
     {
         if (!in_array($type, Consts::getAllowedFileTypes())) {
-            throw new \Exception('Filetype ' . $type .  ' not allowed', HTTP_CODE_400);
+            throw new \Exception('Filetype ' . $type .  ' not allowed', Consts::HTTP_CODE_400);
         }
         return $this;
     }
@@ -501,7 +501,7 @@ class Image
     private function checkFileSize($size)
     {
         if($size > Consts::MAX_FILE_SIZE) {
-            throw new \Exception('Image size exceeds 12MB', HTTP_CODE_400);
+            throw new \Exception('Image size exceeds 12MB', Consts::HTTP_CODE_400);
         }
         return $this;
     }
@@ -514,7 +514,7 @@ class Image
     private function checkImageWidth($width)
     {
         if($width < Consts::MIN_IMAGE_WIDTH) {
-            throw new \Exception('Image requires a minimum width of ' . Consts::MIN_IMAGE_WIDTH . 'px', HTTP_CODE_400);
+            throw new \Exception('Image requires a minimum width of ' . Consts::MIN_IMAGE_WIDTH . 'px', Consts::HTTP_CODE_400);
         }
         return $this;
     }
@@ -528,7 +528,7 @@ class Image
     {
         $imageSize = getimagesizefromstring($decoded);
         if (!is_array($imageSize)){
-            throw new \Exception('Cannot create image from post data.', HTTP_CODE_400);
+            throw new \Exception('Cannot create image from post data.', Consts::HTTP_CODE_400);
         }
         return $this;
     }

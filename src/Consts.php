@@ -25,6 +25,11 @@ class Consts
 
     const TRANSPARENT_WHITE_COLOR = [255, 255, 255, 0];
 
+    const HTTP_CODE_200 = 200;
+    const HTTP_CODE_400 = 400;
+    const HTTP_CODE_403 = 403;
+    const HTTP_CODE_415 = 415;
+
     /**
      * @var array
      */

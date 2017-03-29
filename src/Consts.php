@@ -21,6 +21,8 @@ class Consts
     const NAME_RESAMPLED = 'RESAMPLED';
     const NAME_SOURCE    = 'SOURCE';
 
+    const PHOTOS_SALT = 'jv023kdpamvugyfjzxldkguodls40575kdjf723nc';
+
     const TRANSPARENT_WHITE_COLOR = [255, 255, 255, 0];
 
     /**

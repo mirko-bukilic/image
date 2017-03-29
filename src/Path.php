@@ -69,7 +69,7 @@ class Path
 
     public function getFileHash()
     {
-        return md5($this->photoId . PHOTOS_SALT);
+        return md5($this->photoId . Consts::PHOTOS_SALT);
     }
 
     public function getOriginalFilename()

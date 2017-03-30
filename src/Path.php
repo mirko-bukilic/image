@@ -28,6 +28,12 @@ class Path
         $this->storageConfig = $storageConfig;
     }
 
+    /**
+     * @param string $basePath
+     * @param string $pathSuffix
+     * @param string $filename
+     * @return string
+     */
     public function buildBase($basePath, $pathSuffix, $filename)
     {
         $tmp = '';
@@ -40,26 +46,45 @@ class Path
         return $tmp;
     }
 
+    /**
+     * @param integer $drvId
+     * @return string
+     */
     public function getDerivedFilename($drvId)
     {
         return $this->getFilename($drvId);
     }
 
+    /**
+     * @param integer $drvId
+     * @return string
+     */
     public function getDerivedHashedFilename($drvId)
     {
         return $this->getFilename($drvId, true);
     }
 
+    /**
+     * @param integer $drvId
+     * @return string
+     */
     public function getDerivedPath($drvId)
     {
         return $this->buildPath($this->storageConfig->getPathSuffixDerived(), $this->getDerivedFilename($drvId));
     }
 
+    /**
+     * @param integer $drvId
+     * @return string
+     */
     public function getHashedPath($drvId)
     {
         return $this->buildPath($this->storageConfig->getPathSuffixDerived(), $this->getDerivedHashedFilename($drvId));
     }
 
+    /**
+     * @return string
+     */
     public function getImagePathSuffix()
     {
         $preparedString = substr(str_replace('-', '', $this->photoId),0, 9);
@@ -67,31 +92,53 @@ class Path
         return chunk_split($preparedString, 3, '/');
     }
 
+    /**
+     * @return string
+     */
     public function getFileHash()
     {
         return md5($this->photoId . Consts::PHOTOS_SALT);
     }
 
+    /**
+     * @return string
+     */
     public function getOriginalFilename()
     {
         return $this->getFilename(null, true);
     }
 
+    /**
+     * @return string
+     */
     public function getOriginalPath()
     {
         return $this->buildPath($this->storageConfig->getPathSuffixOriginal(), $this->getOriginalFilename());
     }
 
+    /**
+     * @return string
+     */
     public function getSourcePath()
     {
         return $this->buildPath($this->storageConfig->getPathSuffixSource(), $this->getOriginalFilename());
     }
 
+    /**
+     * @param string $pathSuffix
+     * @param string $filename
+     * @return string
+     */
     private function buildPath($pathSuffix, $filename)
     {
         return $this->buildBase($this->storageConfig->getStoragePath(), $pathSuffix, $filename);
     }
 
+    /**
+     * @param integer $drvId
+     * @param boolean $hashed
+     * @return string
+     */
     private function getFilename($drvId = null, $hashed=false)
     {
         if(!$this->photoId || empty($this->mimeType)) {

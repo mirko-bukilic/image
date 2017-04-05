@@ -125,6 +125,14 @@ class Path
     }
 
     /**
+     * @return \G4\Image\StorageConfig
+     */
+    public function getStorageConfig()
+    {
+        return $this->storageConfig;
+    }
+
+    /**
      * @param string $pathSuffix
      * @param string $filename
      * @return string

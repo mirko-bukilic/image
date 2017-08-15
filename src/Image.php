@@ -61,7 +61,7 @@ class Image
      */
     private $storage;
 
-    public function __construct(\G4\Storage\Storage $storage = null, \G4\Image\StorageConfig $storageConfig = null, $photoId = null, $mimeType = null, $width = null, $height = null)
+    public function __construct(\G4\Storage\Storage $storage = null, \G4\Image\StorageConfig $storageConfig = null, $driver = null, $photoId = null, $mimeType = null, $width = null, $height = null)
     {
         $this->storage = $storage;
         $this->photoId = $photoId;
@@ -69,7 +69,7 @@ class Image
         $this->height = $height;
         $this->width = $width;
         $this->imagePath = new \G4\Image\Path($storageConfig, $this->photoId, $this->mimeType);
-        $this->imageProcess = new \G4\Image\Process();
+        $this->imageProcess = new \G4\Image\Process($driver);
     }
 
     /**

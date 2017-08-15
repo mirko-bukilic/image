@@ -76,7 +76,6 @@ class Image
      * @return \G4\Image\Image
      * @throws \Exception
      */
-    //TODO: Drasko: This needs refactoring!!!
     public function createImageResourceFromBase64Encoded()
     {
         if ( $this->base64Encoded === null ) {
@@ -106,9 +105,10 @@ class Image
         if ($source === false) {
             throw new \Exception('Cannot create image from post data.', Consts::HTTP_CODE_400);
         }
+        $image = $this->imageProcess->make($source);
 
-        $this->setWidth($this->imageProcess->getWidth($source));
-        $this->setHeight($this->imageProcess->getHeight($source));
+        $this->setWidth($image->getWidth());
+        $this->setHeight($image->getHeight());
 
         return $this;
     }
@@ -128,7 +128,8 @@ class Image
         if ($srcImg == null) {
             throw new \Exception('Source image not found.', Consts::HTTP_CODE_403);
         }
-        $cropImg = $this->imageProcess->crop($srcImg, $width, $height, $x, $y);
+        $img = $this->imageProcess->make($srcImg);
+        $cropImg = $this->imageProcess->crop($img, $width, $height, $x, $y);
 
         $this->outputImage($this->getCreatedImageResource($cropImg), $this->imagePath->getOriginalPath());
 
@@ -149,17 +150,17 @@ class Image
     public function getBase64EncodedSourceImage()
     {
         $imageSource = $this->getImageResourceFromPath($this->imagePath->getSourcePath());
-
+        $img = $this->imageProcess->make($imageSource);
         switch ($this->getMimeType())
         {
             case Consts::IMAGE_JPEG:
-                $img = $this->imageProcess->imageJpeg($imageSource, null, Consts::QUALITY_JPEG);
+                $img = $this->imageProcess->imageJpeg($img, null, Consts::QUALITY_JPEG);
                 break;
             case Consts::IMAGE_GIF:
-                $img = $this->imageProcess->imageGif($imageSource);
+                $img = $this->imageProcess->imageGif($img);
                 break;
             case Consts::IMAGE_PNG:
-                $img = $this->imageProcess->imagePng($imageSource, null, Consts::QUALITY_PNG);
+                $img = $this->imageProcess->imagePng($img, null, Consts::QUALITY_PNG);
                 break;
         }
 
@@ -172,7 +173,8 @@ class Image
      */
     public function getCreatedImageResource($image)
     {
-        return $this->imageProcess->getImageResource($image);
+        $img = $this->imageProcess->make($image);
+        return $this->imageProcess->getImageResource($img);
     }
 
     /**
@@ -277,7 +279,8 @@ class Image
      */
     public function imageCopyResampled($dstW, $dstH, $background)
     {
-        $this->resampledImage = $this->imageProcess->imageCopyResampled($this->getImageOriginal(), $dstW, $dstH, $background);
+        $image = $this->imageProcess->make($this->getImageOriginal());
+        $this->resampledImage = $this->imageProcess->imageCopyResampled($image, $dstW, $dstH, $background);
         return $this;
     }
 
@@ -290,9 +293,10 @@ class Image
     public function imageFilledRectangle($resourceName, $x1, $y1)
     {
         $image = $this->getResourceFromName($resourceName);
-        $x2 = $this->imageProcess->getWidth($image);
-        $y2 = $this->imageProcess->getHeight($image);
-        $this->imageProcess->imageFilledRectangle($image, $x1, $y1, $x2, $y2);
+        $img = $this->imageProcess->make($image);
+        $x2 = $img->getWidth();
+        $y2 = $img->getHeight();
+        $this->imageProcess->imageFilledRectangle($img, $x1, $y1, $x2, $y2);
         return $this;
     }
 
@@ -304,7 +308,8 @@ class Image
     public function imageSetTile($resourceName, $tile)
     {
         $image = $this->getResourceFromName($resourceName);
-        $this->imageProcess->imageSetTile($image, $tile);
+        $img = $this->imageProcess->make($image);
+        $this->imageProcess->imageSetTile($img, $tile);
         return $this;
     }
 
@@ -315,7 +320,7 @@ class Image
      */
     public function outputImage($dstImg, $dstPath)
     {
-
+        $img = $this->imageProcess->make($dstImg);
         $localFile = PATH_TMP . md5($dstPath);
 
         $path = dirname($localFile);
@@ -327,13 +332,13 @@ class Image
         switch ($this->getMimeType())
         {
             case Consts::IMAGE_JPEG:
-                $success = $this->imageProcess->imageJpeg($dstImg, $localFile, Consts::QUALITY_JPEG);
+                $success = $this->imageProcess->imageJpeg($img, $localFile, Consts::QUALITY_JPEG);
                 break;
             case Consts::IMAGE_GIF:
-                $success = $this->imageProcess->imageGif($dstImg, $localFile);
+                $success = $this->imageProcess->imageGif($img, $localFile);
                 break;
             case Consts::IMAGE_PNG:
-                $success = $this->imageProcess->imagePng($dstImg, $localFile, Consts::QUALITY_PNG);
+                $success = $this->imageProcess->imagePng($img, $localFile, Consts::QUALITY_PNG);
                 break;
         }
 
@@ -353,7 +358,8 @@ class Image
      */
     public function resize($width, $height)
     {
-        $this->resizedImage = $this->imageProcess->resize($this->getImageResource(), $width, $height);
+        $img = $this->imageProcess->make($this->getImageResource());
+        $this->resizedImage = $this->imageProcess->resize($img, $width, $height);
         return $this;
     }
 
@@ -368,7 +374,8 @@ class Image
     {
         $image = $this->getResourceFromName($resourceName);
         $path = $this->getPathFromResourceName($resourceName);
-        $rotateImg = $this->imageProcess->rotate($image, $angle, $bgdColor, $ignoreTransparent);
+        $img = $this->imageProcess->make($image);
+        $rotateImg = $this->imageProcess->rotate($img, $angle, $bgdColor, $ignoreTransparent);
         $this->outputImage($this->getCreatedImageResource($rotateImg), $path);
 
         return $this;
@@ -391,6 +398,7 @@ class Image
     public function setHeight($value)
     {
         $this->height = $value;
+
         return $this;
     }
 

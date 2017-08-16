@@ -30,6 +30,8 @@ class Consts
     const HTTP_CODE_403 = 403;
     const HTTP_CODE_415 = 415;
 
+    const DEFAULT_DRIVER = 'imagick';
+
     /**
      * @var array
      */

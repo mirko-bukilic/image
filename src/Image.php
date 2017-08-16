@@ -61,13 +61,11 @@ class Image
      */
     private $storage;
 
-    public function __construct(\G4\Storage\Storage $storage = null, \G4\Image\StorageConfig $storageConfig = null, $driver = null, $photoId = null, $mimeType = null, $width = null, $height = null)
+    public function __construct(\G4\Storage\Storage $storage = null, \G4\Image\StorageConfig $storageConfig = null, $photoId = null, $mimeType = null, $driver = Consts::DEFAULT_DRIVER)
     {
         $this->storage = $storage;
         $this->photoId = $photoId;
         $this->mimeType = $mimeType;
-        $this->height = $height;
-        $this->width = $width;
         $this->imagePath = new \G4\Image\Path($storageConfig, $this->photoId, $this->mimeType);
         $this->imageProcess = new \G4\Image\Process($driver);
     }
@@ -182,6 +180,11 @@ class Image
      */
     public function getHeight()
     {
+        if (!isset($this->height)) {
+            $img = $this->imageProcess->make($this->getImageResource());
+            $this->height = $img->height();
+        }
+
         return $this->height;
     }
 
@@ -268,6 +271,11 @@ class Image
      */
     public function getWidth()
     {
+        if (!isset($this->width)) {
+            $img = $this->imageProcess->make($this->getImageResource());
+            $this->width = $img->width();
+        }
+
         return $this->width;
     }
 

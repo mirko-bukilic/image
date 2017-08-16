@@ -13,7 +13,7 @@ class Process
      */
     private $imageManager;
 
-    public function __construct($driver = 'gd')
+    public function __construct($driver = Consts::DEAFULT_DRIVER)
     {
         $this->imageManager =  new ImageManager(['driver' => $driver]);
     }

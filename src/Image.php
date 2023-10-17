@@ -147,7 +147,7 @@ class Image
      */
     public function getBase64EncodedSourceImage()
     {
-        $imageSource = $this->getImageResourceFromPath($this->imagePath->getSourcePath());
+        $imageSource = $this->getImageResourceFromPath($this->imagePath->getSourcePath(), 'src');
         $img = $this->imageProcess->make($imageSource);
         switch ($this->getMimeType())
         {
@@ -193,7 +193,7 @@ class Image
      */
     public function getImageOriginal()
     {
-        return $this->getImageResourceFromPath($this->imagePath->getOriginalPath());
+        return $this->getImageResourceFromPath($this->imagePath->getOriginalPath(), 'org');
     }
 
     /**
@@ -217,7 +217,7 @@ class Image
      */
     public function getImageSource()
     {
-        return $this->getImageResourceFromPath($this->imagePath->getSourcePath());
+        return $this->getImageResourceFromPath($this->imagePath->getSourcePath(), 'src');
     }
 
     /**
@@ -554,12 +554,12 @@ class Image
      * @return resource
      * @throws \Exception
      */
-    private function getImageResourceFromPath($path)
+    private function getImageResourceFromPath($path, $localFileKey = null)
     {
         $localFileName = md5(microtime(true) . $path);
 
         $imagePath = $this->storage
-            ->setLocalFile($localFileName)
+            ->setLocalFile($localFileName, $localFileKey)
             ->setRemoteFile($path)
             ->get();
 

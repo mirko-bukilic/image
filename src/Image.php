@@ -589,4 +589,16 @@ class Image
         return $imgPath;
     }
 
+    /**
+     * @return Image
+     */
+    public function orientateAndSaveToOriginalPath()
+    {
+        $img = $this->imageProcess->make($this->getImageResource());
+        $this->outputImage(
+            $this->getCreatedImageResource($img->orientate()),
+            $this->getImagePath()->getOriginalPath()
+        );
+        return $this;
+    }
 }

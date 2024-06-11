@@ -486,7 +486,7 @@ class Image
 
         return [
             'code'  => Consts::HTTP_CODE_200,
-            'photo' => $photo
+            'photo' => $photo,
         ];
 
     }
@@ -641,9 +641,10 @@ class Image
      */
     private function extractExifDataAndSetOrientation()
     {
-        if ($this->getMimeTypeFromBase64() === Consts::IMAGE_JPEG) {
-            $this->orientation = !empty(exif_read_data($this->base64Encoded)['Orientation'])
-                ? (int) exif_read_data($this->base64Encoded)['Orientation']
+        if ($this->isJpeg()) {
+            $exifData = exif_read_data($this->base64Encoded);
+            $this->orientation = !empty($exifData['Orientation'])
+                ? (int) $exifData['Orientation']
                 : 0;
         }
     }
@@ -658,5 +659,13 @@ class Image
             return $matches[1];
         }
         return null;
+    }
+
+    /**
+     * @return bool
+     */
+    private function isJpeg()
+    {
+        return $this->getMimeTypeFromBase64() === Consts::IMAGE_JPEG;
     }
 }

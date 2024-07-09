@@ -668,4 +668,54 @@ class Image
     {
         return $this->getMimeTypeFromBase64() === Consts::IMAGE_JPEG;
     }
+
+    /**
+     * @param integer $width
+     * @param integer $height
+     * @return Image
+     */
+    public function resizeAndOrientate($width, $height)
+    {
+        $image = $this->imageProcess->make($this->getImageResource());
+        $resized = $this->imageProcess->resize($image, $width, $height);
+        $orientatedAndResized = $this->orientateImage($resized);
+
+        $this->resizedImage = $orientatedAndResized;
+        return $this;
+    }
+
+    /**
+     * @param \Intervention\Image\Image $inputImage
+     * @return \Intervention\Image\Image
+     */
+    private function orientateImage($inputImage)
+    {
+        switch ($this->orientation) {
+            case 2:
+                $image = $inputImage->flip();
+                break;
+            case 3:
+                $image = $inputImage->rotate(180);
+                break;
+            case 4:
+                $image = $inputImage->rotate(180)->flip();
+                break;
+            case 5:
+                $image = $inputImage->rotate(270)->flip();
+                break;
+            case 6:
+                $image = $inputImage->rotate(270);
+                break;
+            case 7:
+                $image = $inputImage->rotate(90)->flip();
+                break;
+            case 8:
+                $image = $inputImage->rotate(90);
+                break;
+            default:
+                $image = $inputImage;
+        }
+
+        return $image;
+    }
 }

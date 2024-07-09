@@ -1,8 +1,6 @@
 <?php
 namespace G4\Image;
 
-use G4\Image\Consts;
-
 class Image
 {
 
@@ -61,6 +59,11 @@ class Image
      */
     private $storage;
 
+    /**
+     * @var int
+     */
+    private $orientation;
+
     public function __construct(\G4\Storage\Storage $storage = null, \G4\Image\StorageConfig $storageConfig = null, $photoId = null, $mimeType = null, $driver = Consts::DEFAULT_DRIVER)
     {
         $this->storage = $storage;
@@ -68,13 +71,14 @@ class Image
         $this->mimeType = $mimeType;
         $this->imagePath = new \G4\Image\Path($storageConfig, $this->photoId, $this->mimeType);
         $this->imageProcess = new \G4\Image\Process($driver);
+        $this->orientation = 0;
     }
 
     /**
      * @return \G4\Image\Image
      * @throws \Exception
      */
-    public function createImageResourceFromBase64Encoded()
+    public function createImageResourceFromBase64Encoded($extractExifData = false)
     {
         if ( $this->base64Encoded === null ) {
             throw new \Exception('Missing base64 encoded image.', Consts::HTTP_CODE_415);
@@ -82,6 +86,10 @@ class Image
 
         if ( ! $this->allowedImageHeader() ) {
             throw new \Exception('Image has unavailable MIME type.', Consts::HTTP_CODE_415);
+        }
+
+        if ($extractExifData) {
+            $this->extractExifDataAndSetOrientation();
         }
 
         $this->base64Encoded = str_replace(Consts::getAllowedHeaders(), '', $this->base64Encoded);
@@ -478,7 +486,7 @@ class Image
 
         return [
             'code'  => Consts::HTTP_CODE_200,
-            'photo' => $photo
+            'photo' => $photo,
         ];
 
     }
@@ -595,10 +603,69 @@ class Image
     public function orientateAndSaveToOriginalPath()
     {
         $img = $this->imageProcess->make($this->getImageResource());
+        switch ($this->orientation) {
+            case 2:
+                $image = $img->flip();
+                break;
+            case 3:
+                $image = $img->rotate(180);
+                break;
+            case 4:
+                $image = $img->rotate(180)->flip();
+                break;
+            case 5:
+                $image = $img->rotate(270)->flip();
+                break;
+            case 6:
+                $image = $img->rotate(270);
+                break;
+            case 7:
+                $image = $img->rotate(90)->flip();
+                break;
+            case 8:
+                $image = $img->rotate(90);
+                break;
+            default:
+                $image = $img;
+        }
+
         $this->outputImage(
-            $this->getCreatedImageResource($img->orientate()),
+            $this->getCreatedImageResource($image),
             $this->getImagePath()->getOriginalPath()
         );
         return $this;
+    }
+
+    /**
+     * @return void
+     */
+    private function extractExifDataAndSetOrientation()
+    {
+        if ($this->isJpeg()) {
+            $exifData = exif_read_data($this->base64Encoded);
+            $this->orientation = !empty($exifData['Orientation'])
+                ? (int) $exifData['Orientation']
+                : 0;
+        }
+    }
+
+    /**
+     * @return string|null
+     */
+    private function getMimeTypeFromBase64()
+    {
+        $string = substr($this->base64Encoded, 0, 30);
+        if (preg_match('/^data:(.*?);base64,/', $string, $matches)) {
+            return $matches[1];
+        }
+        return null;
+    }
+
+    /**
+     * @return bool
+     */
+    private function isJpeg()
+    {
+        return $this->getMimeTypeFromBase64() === Consts::IMAGE_JPEG;
     }
 }

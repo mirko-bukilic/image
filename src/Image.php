@@ -3,6 +3,7 @@ namespace G4\Image;
 
 class Image
 {
+    const SEPARATOR_COMMA = ',';
 
     /**
      * @var string
@@ -64,6 +65,11 @@ class Image
      */
     private $orientation;
 
+    /**
+     * @var string
+     */
+    private $base64Header;
+
     public function __construct(\G4\Storage\Storage $storage = null, \G4\Image\StorageConfig $storageConfig = null, $photoId = null, $mimeType = null, $driver = Consts::DEFAULT_DRIVER)
     {
         $this->storage = $storage;
@@ -88,9 +94,7 @@ class Image
             throw new \Exception('Image has unavailable MIME type.', Consts::HTTP_CODE_415);
         }
 
-        if ($extractExifData) {
-            $this->extractExifDataAndSetOrientation();
-        }
+        $this->setBase64Header();
 
         $this->base64Encoded = str_replace(Consts::getAllowedHeaders(), '', $this->base64Encoded);
 
@@ -99,6 +103,10 @@ class Image
         $decoded = base64_decode( $this->base64Encoded );
 
         $this->checkIfImageIsProperlyDecoded($decoded);
+
+        if ($extractExifData) {
+            $this->extractExifDataAndSetOrientation();
+        }
 
         $f = finfo_open();
 
@@ -642,7 +650,7 @@ class Image
     private function extractExifDataAndSetOrientation()
     {
         if ($this->isJpeg()) {
-            $exifData = exif_read_data($this->base64Encoded);
+            $exifData = exif_read_data($this->base64Header . $this->base64Encoded);
             $this->orientation = !empty($exifData['Orientation'])
                 ? (int) $exifData['Orientation']
                 : 0;
@@ -666,7 +674,7 @@ class Image
      */
     private function isJpeg()
     {
-        return $this->getMimeTypeFromBase64() === Consts::IMAGE_JPEG;
+        return strpos($this->base64Header, Consts::IMAGE_JPEG) !== false;
     }
 
     /**
@@ -717,5 +725,14 @@ class Image
         }
 
         return $image;
+    }
+
+    /**
+     * @return void
+     */
+    private function setBase64Header()
+    {
+        $this->base64Header = explode(self::SEPARATOR_COMMA, $this->base64Encoded, 2)[0];
+        $this->base64Header .= self::SEPARATOR_COMMA;
     }
 }
